@@ -15,12 +15,19 @@ class SyntaxValidator:
 
     def __init__(self) -> None:
         """Initialize syntax validator."""
-        # yamllint configuration
+        # yamllint configuration with relaxed rules
         self.yamllint_config = config.YamlLintConfig(
             "extends: default\n"
             "rules:\n"
-            "  line-length: {max: 3000}\n"
-            "  indentation: {spaces: 2}\n"
+            "  document-start: disable\n"
+            "  line-length: disable\n"
+            "  comments:\n"
+            "    min-spaces-from-content: 1\n"
+            "  comments-indentation: disable\n"
+            "  empty-lines:\n"
+            "    max: 2\n"
+            "  indentation:\n"
+            "    spaces: 2\n"
         )
 
     def validate_file(self, file_path: Path) -> ValidationResult:
