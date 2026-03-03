@@ -1,0 +1,9 @@
+-r requirements.txt
+pytest>=8.0
+pytest-cov>=4.1
+pytest-mock>=3.12
+black>=24.0
+ruff>=0.2
+mypy>=1.8
+types-pyyaml>=6.0
+types-requests>=2.31

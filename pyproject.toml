@@ -1,0 +1,69 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "k8s-manifest-validator"
+version = "0.1.0"
+description = "A portable Python-based CI/CD validation tool for Kubernetes manifests including CRDs"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "DevOps Team", email = "devops@moniepoint.com"}
+]
+keywords = ["kubernetes", "k8s", "validation", "ci-cd", "manifests", "crd", "gitops"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    "pyyaml>=6.0",
+    "jsonschema>=4.21",
+    "yamllint>=1.35",
+    "requests>=2.31",
+    "click>=8.1",
+    "rich>=13.7",
+    "pydantic>=2.6",
+    "python-gitlab>=4.4",
+    "PyGithub>=2.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=4.1",
+    "pytest-mock>=3.12",
+    "black>=24.0",
+    "ruff>=0.2",
+    "mypy>=1.8",
+    "types-pyyaml>=6.0",
+    "types-requests>=2.31",
+]
+
+[project.scripts]
+k8s-validator = "k8s_validator.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["k8s_validator"]
+
+[tool.black]
+line-length = 100
+target-version = ["py39"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
