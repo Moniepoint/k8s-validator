@@ -296,7 +296,7 @@ class BestPracticesValidator:
     ) -> List[ValidationFinding]:
         """Check ConfigMap resources."""
         findings: List[ValidationFinding] = []
-        data = manifest.get("data", {})
+        data = manifest.get("data") or {}
 
         # Check for potentially sensitive data
         sensitive_patterns = ["password", "secret", "token", "key", "credential"]
