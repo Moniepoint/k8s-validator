@@ -26,8 +26,11 @@ class SyntaxValidator:
             "  comments-indentation: disable\n"
             "  empty-lines:\n"
             "    max: 2\n"
+            "    max-start: 0\n"
+            "    max-end: 2\n"
+            "  new-line-at-end-of-file: disable\n"
             "  indentation:\n"
-            "    spaces: 2\n"
+            "    spaces: consistent\n"
         )
 
     def validate_file(self, file_path: Path) -> ValidationResult:
