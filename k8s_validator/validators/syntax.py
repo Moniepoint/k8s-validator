@@ -15,7 +15,7 @@ class SyntaxValidator:
 
     def __init__(self) -> None:
         """Initialize syntax validator."""
-        # yamllint configuration with relaxed rules
+        # yamllint configuration with very relaxed rules for production manifests
         self.yamllint_config = config.YamlLintConfig(
             "extends: default\n"
             "rules:\n"
@@ -24,12 +24,11 @@ class SyntaxValidator:
             "  comments: disable\n"
             "  comments-indentation: disable\n"
             "  empty-lines:\n"
-            "    max: 2\n"
+            "    max: 5\n"
             "    max-start: 0\n"
-            "    max-end: 2\n"
+            "    max-end: 5\n"
             "  new-line-at-end-of-file: disable\n"
-            "  indentation:\n"
-            "    spaces: consistent\n"
+            "  indentation: disable\n"
         )
 
     def validate_file(self, file_path: Path) -> ValidationResult:
