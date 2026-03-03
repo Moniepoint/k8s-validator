@@ -6,7 +6,6 @@ build-backend = "hatchling.build"
 name = "k8s-manifest-validator"
 version = "0.1.0"
 description = "A portable Python-based CI/CD validation tool for Kubernetes manifests including CRDs"
-readme = "README.md"
 requires-python = ">=3.9"
 license = {text = "MIT"}
 authors = [
@@ -60,7 +59,6 @@ packages = ["k8s_validator"]
 include = [
     "k8s_validator/",
     "tests/",
-    "README.md",
     "LICENSE",
 ]
 
