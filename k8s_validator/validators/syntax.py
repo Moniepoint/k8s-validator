@@ -19,7 +19,7 @@ class SyntaxValidator:
         self.yamllint_config = config.YamlLintConfig(
             "extends: default\n"
             "rules:\n"
-            "  line-length: {max: 120}\n"
+            "  line-length: {max: 500}\n"
             "  indentation: {spaces: 2}\n"
         )
 

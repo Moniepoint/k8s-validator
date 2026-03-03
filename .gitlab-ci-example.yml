@@ -1,0 +1,152 @@
+# GitLab CI Configuration for K8s Manifest Validation
+# Copy this to your repository's .gitlab-ci.yml
+
+stages:
+  - validate
+
+default:
+  tags:
+    - mfb_pc_ort_en
+
+# Option 1: Strict validation (fails on any errors)
+validate:k8s-manifests-strict:
+  stage: validate
+  image: python:3.11-slim
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq git
+    - pip install git+https://github.com/Moniepoint/k8s-validator.git@main
+  script:
+    # Auto-fix trailing spaces
+    - find . -name "*.yaml" -o -name "*.yml" | xargs sed -i 's/[[:space:]]*$//'
+
+    # Run validation
+    - k8s-validator validate . --format json --output validation.json
+
+    # Check if there are errors (not just warnings)
+    - |
+      ERROR_COUNT=$(python3 -c "import json; print(json.load(open('validation.json'))['summary']['error_count'])")
+      echo "Found $ERROR_COUNT errors"
+
+      if [ "$ERROR_COUNT" -gt 0 ]; then
+        echo "Validation failed with $ERROR_COUNT errors"
+        python3 -c "
+import json
+data = json.load(open('validation.json'))
+for finding in data['findings']:
+    if finding['severity'] == 'error':
+        print(f\"{finding['file']}:{finding['line']} - {finding['message']}\")
+        "
+        exit 1
+      else
+        echo "All manifests are valid!"
+        exit 0
+      fi
+  artifacts:
+    when: always
+    reports:
+      codequality: validation.json
+    paths:
+      - validation.json
+    expire_in: 30 days
+  only:
+    - merge_requests
+
+# Option 2: Relaxed validation (only fail on critical errors, warnings are ok)
+validate:k8s-manifests-relaxed:
+  stage: validate
+  image: python:3.11-slim
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq git
+    - pip install git+https://github.com/Moniepoint/k8s-validator.git@main
+  script:
+    # Auto-fix trailing spaces
+    - find . -name "*.yaml" -o -name "*.yml" | xargs sed -i 's/[[:space:]]*$//'
+
+    # Run validation with error-only severity
+    - k8s-validator validate . --severity error --format json --output validation.json
+  artifacts:
+    when: always
+    reports:
+      codequality: validation.json
+    paths:
+      - validation.json
+    expire_in: 30 days
+  allow_failure: true
+  only:
+    - merge_requests
+
+# Option 3: Report-only mode (never fails the pipeline)
+validate:k8s-manifests-report:
+  stage: validate
+  image: python:3.11-slim
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq git
+    - pip install git+https://github.com/Moniepoint/k8s-validator.git@main
+  script:
+    # Auto-fix trailing spaces
+    - find . -name "*.yaml" -o -name "*.yml" | xargs sed -i 's/[[:space:]]*$//'
+
+    # Run validation
+    - k8s-validator validate . --format json --output validation.json || true
+
+    # Show summary
+    - |
+      python3 -c "
+import json
+data = json.load(open('validation.json'))
+summary = data['summary']
+print(f\"Validation Results:\")
+print(f\"  Files checked: {summary['files_checked']}\")
+print(f\"  Files with errors: {summary['files_with_errors']}\")
+print(f\"  Total findings: {summary['total_findings']}\")
+print(f\"  Errors: {summary['error_count']}\")
+print(f\"  Warnings: {summary['warning_count']}\")
+print(f\"  Info: {summary['info_count']}\")
+      "
+  artifacts:
+    when: always
+    reports:
+      codequality: validation.json
+    paths:
+      - validation.json
+    expire_in: 30 days
+  allow_failure: true
+  only:
+    - merge_requests
+
+# Option 4: Validate only changed files in MR (most efficient)
+validate:k8s-manifests-changed:
+  stage: validate
+  image: python:3.11-slim
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq git
+    - pip install git+https://github.com/Moniepoint/k8s-validator.git@main
+  script:
+    # Get changed YAML files
+    - |
+      git fetch origin main
+      CHANGED_FILES=$(git diff --name-only origin/main...HEAD | grep -E '\.(yaml|yml)$' || true)
+
+      if [ -z "$CHANGED_FILES" ]; then
+        echo "No YAML/JSON files changed in this MR"
+        exit 0
+      fi
+
+      echo "Changed files:"
+      echo "$CHANGED_FILES"
+
+      # Auto-fix trailing spaces in changed files
+      echo "$CHANGED_FILES" | xargs sed -i 's/[[:space:]]*$//'
+
+      # Validate only changed files
+      k8s-validator validate $CHANGED_FILES --format json --output validation.json
+  artifacts:
+    when: always
+    reports:
+      codequality: validation.json
+    paths:
+      - validation.json
+    expire_in: 30 days
+  allow_failure: true
+  only:
+    - merge_requests
