@@ -1,7 +1,9 @@
 """Kubernetes schema validation using kubeconform."""
 
+import fcntl
 import json
 import subprocess
+import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -62,7 +64,7 @@ class SchemaValidator:
         return result
 
     def _run_kubeconform(self, file_path: Path) -> List[ValidationFinding]:
-        """Run kubeconform on a file."""
+        """Run kubeconform on a file with file locking to prevent concurrent access."""
         findings: List[ValidationFinding] = []
 
         # Build kubeconform command
@@ -88,7 +90,37 @@ class SchemaValidator:
             ]
         )
 
+        # Create lock file to prevent concurrent access to kubeconform binary
+        if not self._kubeconform_path:
+            findings.append(
+                ValidationFinding(
+                    file_path=str(file_path),
+                    severity=Severity.ERROR,
+                    rule_id="schema-error",
+                    message="kubeconform binary not found",
+                )
+            )
+            return findings
+
+        lock_file_path = self._kubeconform_path.parent / ".kubeconform.lock"
+        lock_file = None
+
         try:
+            # Acquire exclusive lock with timeout to prevent concurrent binary access
+            lock_file = open(lock_file_path, "w")
+            max_wait = 30  # seconds
+            start_time = time.time()
+
+            while True:
+                try:
+                    fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    break  # Lock acquired
+                except IOError:
+                    if time.time() - start_time > max_wait:
+                        raise TimeoutError("Could not acquire kubeconform lock after 30s")
+                    time.sleep(0.1)  # Wait 100ms before retry
+
+            # Run kubeconform with lock held
             result = subprocess.run(
                 cmd,
                 capture_output=True,
@@ -156,6 +188,14 @@ class SchemaValidator:
                     message=f"Schema validation error: {e}",
                 )
             )
+        finally:
+            # Always release the lock
+            if lock_file:
+                try:
+                    fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+                    lock_file.close()
+                except Exception:
+                    pass  # Ignore errors when releasing lock
 
         return findings
 
