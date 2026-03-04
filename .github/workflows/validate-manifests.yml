@@ -1,0 +1,49 @@
+name: Validate K8s Manifests
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '**.yaml'
+      - '**.yml'
+      - '**.json'
+
+permissions:
+  contents: read
+  pull-requests: write  # Required to post PR comments
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history needed for git diff
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install validator
+        run: |
+          pip install git+https://github.com/Moniepoint/k8s-validator.git@main
+
+      - name: Auto-fix trailing spaces
+        run: |
+          find . -name "*.yaml" -o -name "*.yml" | xargs sed -i 's/[[:space:]]*$//' || true
+
+      - name: Validate manifests
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          k8s-validator ci --format markdown --post-comment
+
+      - name: Upload validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-report
+          path: validation-report.md
+          retention-days: 30
