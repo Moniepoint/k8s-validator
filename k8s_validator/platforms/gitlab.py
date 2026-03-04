@@ -45,32 +45,43 @@ class GitLabAdapter(PlatformAdapter):
         changed_files: List[Path] = []
 
         try:
-            # Get changed files from git
+            # Get target branch from GitLab environment (default to main)
+            target_branch = os.getenv("CI_MERGE_REQUEST_TARGET_BRANCH_NAME", "main")
+
+            # Fetch the target branch to ensure we have latest
+            subprocess.run(
+                ["git", "fetch", "origin", target_branch],
+                capture_output=True,
+                timeout=30,
+            )
+
+            # Get changed files comparing feature branch to target branch
             result = subprocess.run(
-                ["git", "diff", "--name-only", "origin/main...HEAD"],
+                ["git", "diff", "--name-only", f"origin/{target_branch}...HEAD"],
                 capture_output=True,
                 text=True,
                 timeout=10,
             )
 
             if result.returncode == 0:
-                for file_path in result.stdout.strip().split("\n"):
-                    if not file_path:
-                        continue
-
+                all_changed = [f for f in result.stdout.strip().split("\n") if f]
+                for file_path in all_changed:
                     path = Path(file_path)
-
-                    # Check if file matches patterns
-                    for pattern in patterns:
-                        if path.match(pattern):
-                            if path.exists():
-                                changed_files.append(path)
-                            break
+                    # Check if file matches patterns and exists
+                    if self._matches_pattern(path, patterns) and path.exists():
+                        changed_files.append(path)
 
         except Exception:
             pass
 
         return changed_files
+
+    def _matches_pattern(self, path: Path, patterns: List[str]) -> bool:
+        """Check if path matches any of the given patterns."""
+        for pattern in patterns:
+            if path.match(pattern):
+                return True
+        return False
 
     def post_comment(self, message: str) -> bool:
         """Post validation results as MR comment."""
