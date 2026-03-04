@@ -1,8 +1,6 @@
 """Unit tests for main validator."""
 
-from pathlib import Path
 
-import pytest
 
 from k8s_validator.core.validator import K8sManifestValidator
 from k8s_validator.core.models import ValidationConfig, Severity
@@ -123,7 +121,7 @@ def test_excluded_paths(tmp_path):
     valid_file = tmp_path / "app.yaml"
 
     files = [git_file, vendor_file, valid_file]
-    result = validator.validate_files(files)
+    validator.validate_files(files)
 
     # Should only validate valid_file (but it doesn't exist, so 0 files)
     # This tests the filtering logic

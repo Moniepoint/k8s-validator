@@ -2,10 +2,8 @@
 
 from pathlib import Path
 
-import pytest
 
 from k8s_validator.core.validator import K8sManifestValidator
-from k8s_validator.core.models import Severity
 
 
 def test_validator_initialization():

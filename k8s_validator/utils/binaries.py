@@ -1,7 +1,5 @@
 """Binary downloader and manager for external tools."""
 
-import hashlib
-import os
 import platform
 import shutil
 import subprocess
@@ -22,19 +20,19 @@ class BinaryManager:
         (
             "Darwin",
             "x86_64",
-        ): f"https://github.com/yannh/kubeconform/releases/download/v{{version}}/kubeconform-darwin-amd64.tar.gz",
+        ): "https://github.com/yannh/kubeconform/releases/download/v{version}/kubeconform-darwin-amd64.tar.gz",
         (
             "Darwin",
             "arm64",
-        ): f"https://github.com/yannh/kubeconform/releases/download/v{{version}}/kubeconform-darwin-arm64.tar.gz",
+        ): "https://github.com/yannh/kubeconform/releases/download/v{version}/kubeconform-darwin-arm64.tar.gz",
         (
             "Linux",
             "x86_64",
-        ): f"https://github.com/yannh/kubeconform/releases/download/v{{version}}/kubeconform-linux-amd64.tar.gz",
+        ): "https://github.com/yannh/kubeconform/releases/download/v{version}/kubeconform-linux-amd64.tar.gz",
         (
             "Linux",
             "arm64",
-        ): f"https://github.com/yannh/kubeconform/releases/download/v{{version}}/kubeconform-linux-arm64.tar.gz",
+        ): "https://github.com/yannh/kubeconform/releases/download/v{version}/kubeconform-linux-arm64.tar.gz",
     }
 
     def __init__(self) -> None:

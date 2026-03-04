@@ -214,7 +214,6 @@ def ci(
     """Run validation in CI/CD environment and post results to MR/PR."""
     from k8s_validator.platforms.detector import get_platform
     from pathlib import Path
-    import glob
 
     # Detect or get platform
     if platform == "auto":

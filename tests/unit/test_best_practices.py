@@ -1,11 +1,9 @@
 """Unit tests for best practices validator."""
 
-from pathlib import Path
 
 import pytest
 
 from k8s_validator.validators.best_practices import BestPracticesValidator
-from k8s_validator.core.models import Severity
 
 
 @pytest.fixture

@@ -4,7 +4,6 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import List, Optional
 
-from k8s_validator.core.models import ValidationResult
 
 
 class PlatformAdapter(ABC):

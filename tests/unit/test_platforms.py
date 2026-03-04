@@ -2,9 +2,8 @@
 Unit tests for platform adapters (GitLab, GitHub, Harness)
 """
 import os
-import pytest
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock, mock_open
+from unittest.mock import Mock, patch
 from k8s_validator.platforms.gitlab import GitLabAdapter
 from k8s_validator.platforms.github import GitHubAdapter
 from k8s_validator.platforms.harness import HarnessAdapter

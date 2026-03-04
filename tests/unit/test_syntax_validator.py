@@ -1,11 +1,9 @@
 """Unit tests for syntax validator."""
 
-from pathlib import Path
 
 import pytest
 
 from k8s_validator.validators.syntax import SyntaxValidator
-from k8s_validator.core.models import Severity
 
 
 @pytest.fixture

@@ -1,8 +1,7 @@
 """Unit tests for CRD detector."""
 
-import pytest
 
-from k8s_validator.crds.detector import CRDDetector, BUILTIN_GROUPS
+from k8s_validator.crds.detector import CRDDetector
 
 
 def test_detect_builtin_resource():

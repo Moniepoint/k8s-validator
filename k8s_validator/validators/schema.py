@@ -5,11 +5,11 @@ import json
 import subprocess
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 import yaml
 
-from k8s_validator.core.models import CRDInfo, Severity, ValidationFinding, ValidationResult
+from k8s_validator.core.models import Severity, ValidationFinding, ValidationResult
 from k8s_validator.crds.detector import CRDDetector
 from k8s_validator.crds.schema_loader import CRDSchemaLoader
 from k8s_validator.utils.binaries import BinaryManager
