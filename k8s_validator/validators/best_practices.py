@@ -71,7 +71,7 @@ class BestPracticesValidator:
         findings: List[ValidationFinding] = []
         labels = manifest.get("metadata", {}).get("labels", {})
 
-        recommended_labels = ["app", "version", "component"]
+        recommended_labels = ["app", "moniepoint.com/team"]
         missing = [label for label in recommended_labels if label not in labels]
 
         if missing:
